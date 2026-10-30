@@ -3210,6 +3210,10 @@ static webgpu_encoded_op ggml_webgpu_cumsum(webgpu_context & ctx, ggml_tensor * 
     return ggml_backend_webgpu_build(ctx, pipeline, params, entries, wg_x, wg_y);
 }
 
+static webgpu_encoded_op ggml_webgpu_arange(webgpu_context& ctx, ggml_tensor* dst){
+    return {};
+}
+
 static webgpu_encoded_op ggml_webgpu_sum_rows(webgpu_context & ctx, ggml_tensor * src, ggml_tensor * dst) {
     bool                  total_sum = dst->op == GGML_OP_SUM;
     std::vector<uint32_t> params = { (uint32_t) (ggml_webgpu_tensor_misalignment(ctx, src) / ggml_type_size(src->type)),
@@ -3483,6 +3487,8 @@ static std::optional<webgpu_encoded_op> ggml_webgpu_encode(webgpu_context ctx,
             return ggml_webgpu_argsort(ctx, src0, node);
         case GGML_OP_CUMSUM:
             return ggml_webgpu_cumsum(ctx, src0, node);
+        case GGML_OP_ARANGE:
+            return ggml_webgpu_arange(ctx, node);
         case GGML_OP_SUM:
         case GGML_OP_SUM_ROWS:
             return ggml_webgpu_sum_rows(ctx, src0, node);
@@ -4781,6 +4787,9 @@ static bool ggml_backend_webgpu_device_supports_op(ggml_backend_dev_t dev, const
             break;
         case GGML_OP_CUMSUM:
             supports_op = op->type == GGML_TYPE_F32 && src0->type == op->type;
+            break;
+        case GGML_OP_ARANGE:
+            supports_op = op->type == GGML_TYPE_F32;
             break;
         case GGML_OP_SUM:
             supports_op = op->type == GGML_TYPE_F32 && src0->type == op->type && ggml_is_contiguously_allocated(src0);
